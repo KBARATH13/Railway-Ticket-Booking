@@ -1,0 +1,38 @@
+# ── Dependencies ──────────────────────────────────────────────
+node_modules/
+.pnp
+.pnp.js
+
+# ── Environment & Secrets (NEVER commit these) ────────────────
+.env
+.env.*
+!.env.example
+seed.js
+
+# ── Logs ──────────────────────────────────────────────────────
+logs/
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# ── Runtime / OS ──────────────────────────────────────────────
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# ── Build / Coverage output ───────────────────────────────────
+dist/
+build/
+coverage/
+.nyc_output/
+
+# ── IDE & Editor ──────────────────────────────────────────────
+.vscode/
+.idea/
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
