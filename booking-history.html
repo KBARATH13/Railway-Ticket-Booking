@@ -1,0 +1,317 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Booking History - Barath Railway</title>
+    <link rel="stylesheet" href="index.css">
+    <style>
+        .history-container {
+            max-width: 900px;
+            margin: 100px auto 50px;
+            padding: 20px;
+        }
+
+        .history-title {
+            color: #e0c97f;
+            font-size: 28px;
+            margin-bottom: 30px;
+            text-align: center;
+        }
+
+        .booking-card {
+            background: rgba(255, 255, 255, 0.07);
+            backdrop-filter: blur(16px);
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 20px;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.4);
+        }
+
+        .booking-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            padding-bottom: 15px;
+        }
+
+        .booking-train-name {
+            font-size: 20px;
+            font-weight: bold;
+            color: #e0c97f;
+        }
+
+        .booking-status {
+            padding: 6px 12px;
+            border-radius: 6px;
+            font-size: 12px;
+            font-weight: bold;
+            background: rgba(76, 175, 80, 0.3);
+            color: #4caf50;
+        }
+
+        .booking-details {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin-bottom: 15px;
+        }
+
+        .detail-item {
+            background: rgba(255, 255, 255, 0.03);
+            padding: 12px;
+            border-radius: 8px;
+            border-left: 3px solid #e0c97f;
+        }
+
+        .detail-label {
+            color: #aaa;
+            font-size: 12px;
+            text-transform: uppercase;
+            margin-bottom: 5px;
+        }
+
+        .detail-value {
+            color: #fff;
+            font-size: 14px;
+            font-weight: 500;
+        }
+
+        .passengers-list {
+            background: rgba(255, 255, 255, 0.03);
+            padding: 12px;
+            border-radius: 8px;
+            margin-top: 15px;
+        }
+
+        .passengers-label {
+            color: #aaa;
+            font-size: 12px;
+            text-transform: uppercase;
+            margin-bottom: 8px;
+        }
+
+        .passenger-item {
+            color: #e0e0e0;
+            padding: 5px 0;
+            font-size: 13px;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 60px 20px;
+            color: #aaa;
+        }
+
+        .empty-state-icon {
+            font-size: 48px;
+            margin-bottom: 20px;
+            opacity: 0.5;
+        }
+
+        .empty-state-text {
+            font-size: 18px;
+            margin-bottom: 20px;
+        }
+
+        .btn {
+            background: linear-gradient(135deg, #e0c97f, #c8a94a);
+            color: #1a1a2e;
+            padding: 12px 24px;
+            border: none;
+            border-radius: 8px;
+            font-weight: bold;
+            cursor: pointer;
+            text-decoration: none;
+            display: inline-block;
+        }
+
+        .btn:hover {
+            opacity: 0.9;
+        }
+
+        .api-error {
+            background: rgba(244, 67, 54, 0.2);
+            color: #ff5252;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            display: none;
+        }
+
+        .api-loading {
+            text-align: center;
+            padding: 40px;
+            color: #e0c97f;
+            font-size: 18px;
+        }
+    </style>
+</head>
+
+<body>
+    <div id="user-profile-container"></div>
+    <header>
+        <h1>BOOKING HISTORY</h1>
+        <nav>
+            <ul>
+                <li><a href="index.html" class="nav-link">Home</a></li>
+                <li id="nav-trains" class="hidden"><a href="trains.html" class="nav-link">Trains</a></li>
+                <li id="nav-book" class="hidden"><a href="book.html" class="nav-link">Booking</a></li>
+                <li id="nav-history" class="hidden"><a href="booking-history.html" class="nav-link active">History</a></li>
+                <li id="auth-nav"></li>
+            </ul>
+        </nav>
+    </header>
+
+    <main>
+        <div class="history-container">
+            <div id="api-error" class="api-error"></div>
+            <div id="loading" class="api-loading">Loading your bookings...</div>
+            <div id="bookings-list"></div>
+        </div>
+    </main>
+
+    <footer>
+        <p>&copy; 2026 Barath Railway Booking Platform. All rights reserved.</p>
+    </footer>
+
+    <script>
+        // Dynamic API base: empty string (relative) when served via the unified
+        // dev-server or ngrok tunnel; absolute URL only as VS Code Live Server fallback.
+        const API_URL = (
+          (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') &&
+          window.location.port === '5500'
+        ) ? 'http://localhost:3000' : '';
+
+        const token = localStorage.getItem('token');
+        const user = JSON.parse(localStorage.getItem('user') || '{}');
+        const userProfile = document.getElementById('user-profile-container');
+        const authNav = document.getElementById('auth-nav');
+        const navTrains = document.getElementById('nav-trains');
+        const navBook = document.getElementById('nav-book');
+        const navHistory = document.getElementById('nav-history');
+
+        // Load auth nav
+        function loadAuthNav() {
+            if (token && user.name) {
+                // Logged In - show profile container
+                userProfile.innerHTML = `
+                    <div class="user-profile">
+                        <span class="user-name">Hi, ${user.name}</span>
+                        <a href="#" class="logout-link" onclick="logout()">Logout</a>
+                    </div>
+                `;
+                authNav.innerHTML = ''; // Hide auth-nav when logged in
+                navTrains.classList.remove('hidden');
+                navBook.classList.remove('hidden');
+                navHistory.classList.remove('hidden');
+            } else {
+                // Logged Out
+                userProfile.innerHTML = '';
+                authNav.innerHTML = `<a href="login.html" class="nav-link">Login / Register</a>`;
+                navTrains.classList.add('hidden');
+                navBook.classList.add('hidden');
+                navHistory.classList.add('hidden');
+            }
+        }
+
+        function logout() {
+            localStorage.removeItem('token');
+            localStorage.removeItem('user');
+            window.location.href = 'index.html';
+        }
+
+        async function loadBookingHistory() {
+            const loading = document.getElementById('loading');
+            const errorDiv = document.getElementById('api-error');
+            const bookingsList = document.getElementById('bookings-list');
+
+            if (!token) {
+                loading.style.display = 'none';
+                errorDiv.textContent = 'Please login to view your booking history.';
+                errorDiv.style.display = 'block';
+                return;
+            }
+
+            try {
+                const res = await fetch(`${API_URL}/api/bookings`, {
+                    headers: {
+                        'Authorization': `Bearer ${token}`,
+                        'Content-Type': 'application/json'
+                    }
+                });
+
+                if (!res.ok) {
+                    throw new Error(res.status === 401 ? 'Unauthorized. Please login again.' : 'Failed to load bookings');
+                }
+
+                const bookings = await res.json();
+                loading.style.display = 'none';
+
+                if (!bookings || bookings.length === 0) {
+                    bookingsList.innerHTML = `
+                        <div class="empty-state">
+                            <div class="empty-state-icon">🎫</div>
+                            <div class="empty-state-text">No bookings yet</div>
+                            <p>Start by booking a train ticket today!</p>
+                            <button class="btn" onclick="window.location.href='book.html'">Book a Ticket</button>
+                        </div>
+                    `;
+                    return;
+                }
+
+                bookingsList.innerHTML = bookings.map(booking => `
+                    <div class="booking-card">
+                        <div class="booking-header">
+                            <div class="booking-train-name">${booking.trainName || 'Train'}</div>
+                            <div class="booking-status">✓ Confirmed</div>
+                        </div>
+                        <div class="booking-details">
+                            <div class="detail-item">
+                                <div class="detail-label">Booking ID</div>
+                                <div class="detail-value">${booking.bookingId || 'N/A'}</div>
+                            </div>
+                            <div class="detail-item">
+                                <div class="detail-label">Train Class</div>
+                                <div class="detail-value">${booking.seatClass || 'N/A'}</div>
+                            </div>
+                            <div class="detail-item">
+                                <div class="detail-label">Number of Seats</div>
+                                <div class="detail-value">${booking.seatsBooked || 0}</div>
+                            </div>
+                            <div class="detail-item">
+                                <div class="detail-label">Seat Numbers</div>
+                                <div class="detail-value">${booking.passengers && booking.passengers.length > 0 ? booking.passengers.map(p => p.seatId).join(', ') : 'N/A'}</div>
+                            </div>
+                        </div>
+                        ${booking.passengers && booking.passengers.length > 0 ? `
+                            <div class="passengers-list">
+                                <div class="passengers-label">Passengers</div>
+                                ${booking.passengers.map((p, i) => `
+                                    <div class="passenger-item">
+                                        ${i + 1}. ${p.name || 'N/A'}
+                                    </div>
+                                `).join('')}
+                            </div>
+                        ` : ''}
+                    </div>
+                `).join('');
+
+            } catch (err) {
+                loading.style.display = 'none';
+                errorDiv.textContent = err.message || 'Error loading bookings';
+                errorDiv.style.display = 'block';
+            }
+        }
+
+        // Initialize
+        loadAuthNav();
+        loadBookingHistory();
+    </script>
+</body>
+
+</html>

@@ -1,0 +1,414 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Book Tickets - Barath Railway</title>
+  <link rel="stylesheet" href="book.css">
+</head>
+
+<body>
+  <div id="user-profile-container"></div>
+  <header>
+    <h1><b>BOOK YOUR TICKETS</b></h1>
+    <nav>
+      <ul>
+        <li><a href="index.html" class="nav-link">Home</a></li>
+        <li id="nav-trains" class="hidden"><a href="trains.html" class="nav-link">Trains</a></li>
+        <li id="nav-book" class="hidden"><a href="book.html" class="nav-link active">Booking</a></li>
+        <li id="nav-history" class="hidden"><a href="booking-history.html" class="nav-link">History</a></li>
+        <li id="auth-nav"></li>
+      </ul>
+    </nav>
+  </header>
+
+  <main>
+    <div class="booking-container">
+
+      <!-- Step 1: Select Train & Class -->
+      <div class="step" id="step-1">
+        <h2 class="step-title">Step 1 — Select Train &amp; Class</h2>
+        <div class="form-group">
+          <label for="train-select">Select Train</label>
+          <select id="train-select">
+            <option value="">-- Choose a Train --</option>
+          </select>
+        </div>
+        <div class="form-group" id="class-group" style="display:none;">
+          <label for="class-select">Select Class</label>
+          <select id="class-select">
+            <option value="">-- Choose a Class --</option>
+          </select>
+        </div>
+        <div class="seat-info" id="seat-info" style="display:none;">
+          <span id="available-seats-text"></span>
+        </div>
+        <div class="api-error" id="step1-error" style="display:none;"></div>
+        <button class="btn" id="next-btn" onclick="goToStep2()" style="display:none;">Next →</button>
+      </div>
+
+      <!-- Step 2: Enter Passenger Details -->
+      <div class="step hidden" id="step-2">
+        <h2 class="step-title">Step 2 — Passenger Details</h2>
+        <div class="form-group">
+          <label for="num-seats">Number of Seats</label>
+          <input type="number" id="num-seats" min="1" max="10" placeholder="How many seats?"
+            oninput="generatePassengerFields()">
+        </div>
+        <div id="passenger-fields"></div>
+        <div class="api-error" id="step2-error" style="display:none;"></div>
+        <div class="btn-row">
+          <button class="btn btn-secondary" onclick="goToStep1()">← Back</button>
+          <button class="btn" id="book-btn" onclick="confirmBooking()" style="display:none;">Confirm Booking ✓</button>
+        </div>
+      </div>
+
+      <!-- Step 3: Booking Confirmation -->
+      <div class="step hidden" id="step-3">
+        <div class="success-icon">✓</div>
+        <h2 class="step-title success-title">Booking Confirmed!</h2>
+        <div class="confirmation-box" id="confirmation-details"></div>
+        <button class="btn" onclick="newBooking()">Book Another Ticket</button>
+      </div>
+
+    </div>
+  </main>
+
+  <footer>
+    <p>&copy; 2026 Barath Railway Booking Platform. All rights reserved.</p>
+  </footer>
+
+  <script>
+    // Dynamic API base: empty string (relative) when served via the unified
+    // dev-server or ngrok tunnel; absolute URL only as VS Code Live Server fallback.
+    const API_BASE = (
+      (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') &&
+      window.location.port === '5500'
+    ) ? 'http://localhost:3000/api' : '/api';
+
+    let trainData = [];
+    let selectedTrain = null;
+    let selectedClass = null;
+
+    // ── Helpers ─────────────────────────────────────────
+    function showError(id, msg) {
+      const el = document.getElementById(id);
+      el.textContent = msg;
+      el.style.display = 'block';
+    }
+    function hideError(id) {
+      const el = document.getElementById(id);
+      el.textContent = '';
+      el.style.display = 'none';
+    }
+    function setLoading(btnId, loading) {
+      const btn = document.getElementById(btnId);
+      if (!btn) return;
+      btn.disabled = loading;
+      btn.textContent = loading ? 'Please wait…' : 'Confirm Booking ✓';
+    }
+
+    // ── Load trains from backend API ─────────────────────
+    async function loadTrains() {
+      try {
+        const res = await fetch(`${API_BASE}/trains`);
+        if (!res.ok) throw new Error(`Server error: ${res.status}`);
+        trainData = await res.json();
+        const select = document.getElementById('train-select');
+        trainData.forEach(train => {
+          const opt = document.createElement('option');
+          opt.value = train.id;
+          opt.textContent = `${train.name}  (${train.from} → ${train.to})`;
+          select.appendChild(opt);
+        });
+      } catch (e) {
+        console.error('Could not load trains:', e);
+        showError('step1-error', '⚠️ Could not connect to the server. Make sure the backend is running on port 3001.');
+      }
+    }
+
+    // ── Train dropdown change ────────────────────────────
+    document.getElementById('train-select').addEventListener('change', function () {
+      const trainId = this.value;
+      selectedTrain = trainData.find(t => t.id === trainId) || null;
+      const classGroup = document.getElementById('class-group');
+      const classSelect = document.getElementById('class-select');
+      const seatInfo = document.getElementById('seat-info');
+      const nextBtn = document.getElementById('next-btn');
+      hideError('step1-error');
+
+      classSelect.innerHTML = '<option value="">-- Choose a Class --</option>';
+      seatInfo.style.display = 'none';
+      nextBtn.style.display = 'none';
+
+      if (selectedTrain) {
+        classGroup.style.display = 'block';
+        selectedTrain.seats.forEach(s => {
+          const opt = document.createElement('option');
+          opt.value = s.class;
+          opt.textContent = `${s.class}  (${s.available} seats available)`;
+          if (s.available === 0) opt.disabled = true;
+          classSelect.appendChild(opt);
+        });
+      } else {
+        classGroup.style.display = 'none';
+      }
+    });
+
+    // ── Class dropdown change ────────────────────────────
+    document.getElementById('class-select').addEventListener('change', function () {
+      const cls = this.value;
+      selectedClass = null;
+      const seatInfo = document.getElementById('seat-info');
+      const nextBtn = document.getElementById('next-btn');
+
+      if (cls && selectedTrain) {
+        selectedClass = selectedTrain.seats.find(s => s.class === cls);
+        seatInfo.style.display = 'block';
+        document.getElementById('available-seats-text').textContent =
+          `🪑 ${selectedClass.available} seat(s) available in ${cls}`;
+        nextBtn.style.display = 'block';
+      } else {
+        seatInfo.style.display = 'none';
+        nextBtn.style.display = 'none';
+      }
+    });
+
+    // ── Navigation ───────────────────────────────────────
+    function goToStep2() {
+      if (!selectedTrain || !selectedClass) return;
+      document.getElementById('step-1').classList.add('hidden');
+      document.getElementById('step-2').classList.remove('hidden');
+      document.getElementById('num-seats').max = selectedClass.available;
+      document.getElementById('num-seats').value = '';
+      document.getElementById('passenger-fields').innerHTML = '';
+      document.getElementById('book-btn').style.display = 'none';
+      hideError('step2-error');
+    }
+
+    function goToStep1() {
+      document.getElementById('step-2').classList.add('hidden');
+      document.getElementById('step-1').classList.remove('hidden');
+    }
+
+    // ── Generate per-seat passenger name fields ──────────
+    function generatePassengerFields() {
+      const n = parseInt(document.getElementById('num-seats').value);
+      const container = document.getElementById('passenger-fields');
+      const bookBtn = document.getElementById('book-btn');
+      container.innerHTML = '';
+      hideError('step2-error');
+
+      if (!n || n < 1 || n > selectedClass.available) {
+        bookBtn.style.display = 'none';
+        if (n > selectedClass.available) {
+          const warn = document.createElement('p');
+          warn.className = 'warn-text';
+          warn.textContent = `⚠️ Only ${selectedClass.available} seat(s) available.`;
+          container.appendChild(warn);
+        }
+        return;
+      }
+
+      for (let i = 1; i <= n; i++) {
+        const group = document.createElement('div');
+        group.className = 'form-group passenger-row';
+        group.innerHTML = `
+                    <label>Passenger ${i} Name</label>
+                    <input type="text" id="passenger-${i}" placeholder="Enter full name" required>
+                `;
+        container.appendChild(group);
+      }
+      bookBtn.style.display = 'block';
+    }
+
+    // ── Confirm Booking — POST to backend API ────────────
+    async function confirmBooking() {
+      const n = parseInt(document.getElementById('num-seats').value);
+      const passengers = [];
+      hideError('step2-error');
+
+      for (let i = 1; i <= n; i++) {
+        const name = document.getElementById(`passenger-${i}`).value.trim();
+        if (!name) {
+          alert(`Please enter the name for Passenger ${i}.`);
+          document.getElementById(`passenger-${i}`).focus();
+          return;
+        }
+        passengers.push(name);
+      }
+
+      const token = localStorage.getItem('token');
+      if (!token) {
+        alert('You must be logged in to book a ticket.');
+        window.location.href = 'login.html?redirect=book.html';
+        return;
+      }
+
+      setLoading('book-btn', true);
+
+      try {
+        const res = await fetch(`${API_BASE}/bookings`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`
+          },
+          body: JSON.stringify({
+            trainId: selectedTrain.id,
+            seatClass: selectedClass.class,
+            passengers
+          })
+        });
+
+        const data = await res.json();
+
+        if (!res.ok) {
+          setLoading('book-btn', false);
+          showError('step2-error', `❌ ${data.error || 'Booking failed. Please try again.'}`);
+          return;
+        }
+
+        // ── Show confirmation ────────────────────────
+        document.getElementById('step-2').classList.add('hidden');
+        document.getElementById('step-3').classList.remove('hidden');
+
+        const b = data.booking;
+        const confirmBox = document.getElementById('confirmation-details');
+
+        // --- Generate Seat Map ---
+        const totalRows = b.totalRows || 10;
+        const seatsPerRow = b.seatsPerRow || 5;
+        const mySeatIds = new Set(b.passengers.map(p => p.seatId));
+        const allBooked = new Set(b.allBookedSeats || []);
+
+        let gridHtml = `<div class="seat-grid" style="grid-template-columns: repeat(${seatsPerRow}, 1fr);">`;
+
+        for (let r = 1; r <= totalRows; r++) {
+          for (let c = 1; c <= seatsPerRow; c++) {
+            const sid = `R${r}-S${c}`;
+            let className = 'seat';
+            let content = `<span style="opacity:0.3">${c}</span>`;
+
+            if (mySeatIds.has(sid)) {
+              className += ' my-seat';
+              content = '✓';
+            } else if (allBooked.has(sid)) {
+              className += ' booked-other';
+              content = '';
+            }
+
+            gridHtml += `<div class="${className}" title="${sid}">${content}</div>`;
+          }
+        }
+        gridHtml += `</div>
+        <div class="seat-map-legend">
+            <div class="legend-item"><div class="legend-dot" style="background:#56ab2f"></div> Your Seats</div>
+            <div class="legend-item"><div class="legend-dot" style="background:#d64545"></div> Booked</div>
+            <div class="legend-item"><div class="legend-dot" style="background:#444"></div> Available</div>
+        </div>`;
+
+        confirmBox.innerHTML = `
+            <div class="confirm-row"><span>Train</span><strong>${b.trainName}</strong></div>
+            <div class="confirm-row"><span>Route</span><strong>${b.from} → ${b.to}</strong></div>
+            <div class="confirm-row"><span>Departure</span><strong>${b.departure}</strong></div>
+            <div class="confirm-row"><span>Arrival</span><strong>${b.arrival}</strong></div>
+            <div class="confirm-row"><span>Class</span><strong>${b.seatClass}</strong></div>
+            <div class="confirm-row"><span>Seats Booked</span><strong>${b.seatsBooked}</strong></div>
+            <hr>
+            <h4 style="margin:10px 0 8px;">Seat Map (Row ${totalRows} x ${seatsPerRow})</h4>
+            ${gridHtml}
+            <hr>
+            <h4 style="margin:10px 0 8px;">Passengers</h4>
+            ${b.passengers.map(p => `
+                <div class="confirm-row passenger-confirm">
+                    <span>Seat ${p.seatId}</span>
+                    <strong>${p.name}</strong>
+                </div>
+            `).join('')}
+            <div class="booking-id">Booking ID: ${b.bookingId}</div>
+        `;
+
+      } catch (err) {
+        setLoading('book-btn', false);
+        showError('step2-error', '❌ Could not reach the server. Make sure the backend is running on port 3001.');
+        console.error('Booking error:', err);
+      }
+    }
+
+    // ── Reset for a new booking ──────────────────────────
+    function newBooking() {
+      document.getElementById('step-3').classList.add('hidden');
+      document.getElementById('step-1').classList.remove('hidden');
+      document.getElementById('train-select').value = '';
+      document.getElementById('class-select').innerHTML = '<option value="">-- Choose a Class --</option>';
+      document.getElementById('class-group').style.display = 'none';
+      document.getElementById('seat-info').style.display = 'none';
+      document.getElementById('next-btn').style.display = 'none';
+      selectedTrain = null;
+      selectedClass = null;
+      // Reload trains to get fresh seat counts
+      document.getElementById('train-select').innerHTML = '<option value="">-- Choose a Train --</option>';
+      loadTrains();
+    }
+
+    // ── Auth Check & Nav ────────────────────────────────
+    const token = localStorage.getItem('token');
+    const user = JSON.parse(localStorage.getItem('user') || '{}');
+    const authNav = document.getElementById('auth-nav');
+    const userProfile = document.getElementById('user-profile-container');
+    const navTrains = document.getElementById('nav-trains');
+    const navBook = document.getElementById('nav-book');
+    const navHistory = document.getElementById('nav-history');
+
+    if (token && user.name) {
+      userProfile.innerHTML = `
+        <div class="user-profile">
+            <span class="user-name">Hi, ${user.name}</span>
+            <a href="#" class="logout-link" onclick="logout()">Logout</a>
+        </div>
+      `;
+      authNav.innerHTML = '';
+      if (navTrains) navTrains.classList.remove('hidden');
+      if (navBook) navBook.classList.remove('hidden');
+      if (navHistory) navHistory.classList.remove('hidden');
+    } else {
+      userProfile.innerHTML = '';
+      if (authNav) authNav.innerHTML = `<a href="login.html?redirect=book.html" class="nav-link">Login / Register</a>`;
+      if (navTrains) navTrains.classList.add('hidden');
+      if (navBook) navBook.classList.add('hidden');
+      if (navHistory) navHistory.classList.add('hidden');
+    }
+
+    function logout() {
+      localStorage.removeItem('token');
+      localStorage.removeItem('user');
+      window.location.href = 'index.html';
+    }
+
+    // ── Init ─────────────────────────────────────────────
+    loadTrains().then(() => {
+      const params = new URLSearchParams(window.location.search);
+      const trainId = params.get('train');
+      const cls = params.get('class');
+
+      if (trainId) {
+        const trainSelect = document.getElementById('train-select');
+        trainSelect.value = trainId;
+        trainSelect.dispatchEvent(new Event('change'));
+
+        if (cls) {
+          setTimeout(() => {
+            const classSelect = document.getElementById('class-select');
+            classSelect.value = cls;
+            classSelect.dispatchEvent(new Event('change'));
+            setTimeout(() => goToStep2(), 100);
+          }, 50);
+        }
+      }
+    });
+  </script>
+</body>
+
+</html>

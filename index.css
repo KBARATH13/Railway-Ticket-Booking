@@ -1,0 +1,351 @@
+/* ============================
+   Base & Reset
+   ============================ */
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+body {
+    background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
+    min-height: 100vh;
+    font-family: 'Segoe UI', Arial, sans-serif;
+    color: #e0e0e0;
+}
+
+/* ============================
+   Header & Nav
+   ============================ */
+header {
+    background: rgba(0, 0, 0, 0.7);
+    /* Slightly darker for readability over content */
+    backdrop-filter: blur(15px);
+    padding: 18px 0 0;
+    text-align: center;
+    border-bottom: 0px solid rgba(255, 255, 255, 0.1);
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    z-index: 1000;
+}
+
+header h1 {
+    font-size: 1.8rem;
+    letter-spacing: 2px;
+    color: #e0c97f;
+    margin-bottom: 12px;
+}
+
+.hidden {
+    display: none !important;
+}
+
+nav ul {
+    list-style: none;
+    display: flex;
+    justify-content: center;
+    gap: 30px;
+    background: rgba(255, 255, 255, 0.05);
+    padding: 10px 0;
+}
+
+nav ul li a {
+    color: #ccc;
+    text-decoration: none;
+    font-size: 15px;
+    letter-spacing: 1px;
+    transition: color 0.2s;
+    cursor: pointer;
+}
+
+nav ul li a:hover {
+    color: #e0c97f;
+}
+
+/* ============================
+   Main Layout
+   ============================ */
+main {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 140px 20px 60px;
+}
+
+/* ============================
+   Hero Section
+   ============================ */
+.hero {
+    text-align: center;
+    margin-bottom: 50px;
+    animation: fadeIn 1s ease;
+}
+
+.hero h2 {
+    font-size: 2.5rem;
+    color: #fff;
+    margin-bottom: 10px;
+    text-shadow: 0 4px 10px rgba(0, 0, 0, 0.5);
+}
+
+.hero p {
+    font-size: 1.1rem;
+    color: #aab;
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* ============================
+   Action Cards
+   ============================ */
+.action-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 24px;
+    width: 100%;
+    max-width: 900px;
+}
+
+.action-card {
+    background: rgba(255, 255, 255, 0.07);
+    backdrop-filter: blur(12px);
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    border-radius: 16px;
+    padding: 30px;
+    text-align: left;
+    /* Changed from center for detailing */
+    transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.action-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+    background: rgba(255, 255, 255, 0.1);
+}
+
+.detail-list {
+    list-style: none;
+    margin-top: 15px;
+    padding-top: 15px;
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.detail-list li {
+    font-size: 0.85rem;
+    color: #e0c97f;
+    margin-bottom: 8px;
+    padding-left: 20px;
+    position: relative;
+}
+
+.detail-list li::before {
+    content: '✦';
+    position: absolute;
+    left: 0;
+    color: #c8a94a;
+}
+
+.icon {
+    font-size: 40px;
+    margin-bottom: 16px;
+    display: block;
+}
+
+.action-card h3 {
+    color: #e0c97f;
+    margin-bottom: 10px;
+    font-size: 1.4rem;
+}
+
+.action-card p {
+    color: #ccc;
+    font-size: 0.95rem;
+    line-height: 1.5;
+}
+
+/* ============================
+   Search Section
+   ============================ */
+.search-section {
+    background: rgba(0, 0, 0, 0.2);
+    padding: 30px;
+    border-radius: 20px;
+    margin-bottom: 40px;
+    width: 100%;
+    max-width: 600px;
+    display: flex;
+    gap: 10px;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.search-input {
+    flex: 1;
+    padding: 12px 16px;
+    background: rgba(255, 255, 255, 0.08);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    border-radius: 10px;
+    color: #fff;
+    outline: none;
+}
+
+.search-input:focus {
+    border-color: #e0c97f;
+    background: rgba(255, 255, 255, 0.12);
+}
+
+.search-btn {
+    padding: 12px 24px;
+    background: linear-gradient(135deg, #e0c97f, #c8a94a);
+    color: #1a1a2e;
+    border: none;
+    border-radius: 10px;
+    font-weight: bold;
+    cursor: pointer;
+}
+
+.search-btn:hover {
+    opacity: 0.9;
+}
+
+/* ============================
+   Auth User Display — Top Right
+   ============================ */
+.user-profile {
+    position: fixed;
+    top: 20px;
+    right: 30px;
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    background: rgba(255, 255, 255, 0.08);
+    padding: 8px 18px;
+    border-radius: 30px;
+    backdrop-filter: blur(8px);
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    z-index: 2000;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.4);
+    transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+.user-profile:hover {
+    transform: translateY(-2px);
+    background: rgba(255, 255, 255, 0.12);
+    border-color: rgba(224, 201, 127, 0.4);
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.5);
+}
+
+.user-profile .user-name {
+    color: #e0c97f;
+    font-weight: 600;
+    font-size: 14px;
+}
+
+.user-profile .logout-link {
+    color: #aaa;
+    text-decoration: none;
+    font-size: 12px;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    transition: color 0.2s;
+}
+
+.user-profile .logout-link:hover {
+    color: #f08090;
+}
+
+.nav-link.active {
+    color: #e0c97f !important;
+    font-weight: bold;
+    border-bottom: 2px solid #e0c97f;
+    padding-bottom: 4px;
+}
+
+/* ============================
+   Footer
+   ============================ */
+footer {
+    background: rgba(0, 0, 0, 0.5);
+    color: #666;
+    text-align: center;
+    padding: 14px 0;
+    position: fixed;
+    bottom: 0;
+    width: 100%;
+    font-size: 13px;
+    border-top: 1px solid rgba(255, 255, 255, 0.07);
+}
+
+/* ============================
+   Mobile Responsiveness
+   ============================ */
+@media (max-width: 768px) {
+    header {
+        padding: 12px 0 0;
+    }
+
+    header h1 {
+        font-size: 1.4rem;
+        margin-bottom: 8px;
+    }
+
+    nav ul {
+        gap: 15px;
+        padding: 8px 0;
+    }
+
+    nav ul li a {
+        font-size: 13px;
+    }
+
+    main {
+        padding: 120px 15px 80px;
+    }
+
+    .hero h2 {
+        font-size: 1.8rem;
+    }
+
+    .hero p {
+        font-size: 1rem;
+    }
+
+    .search-section {
+        flex-direction: column;
+        padding: 20px;
+    }
+
+    .search-btn {
+        width: 100%;
+    }
+
+    .action-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .user-profile {
+        top: 10px;
+        right: 15px;
+        padding: 6px 14px;
+    }
+
+    .user-profile .user-name {
+        font-size: 12px;
+    }
+
+    footer {
+        font-size: 11px;
+        padding: 10px 0;
+    }
+}

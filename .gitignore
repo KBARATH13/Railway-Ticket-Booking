@@ -1,0 +1,56 @@
+# ╔══════════════════════════════════════════════════════════════╗
+# ║   Railway Seating Management — Root .gitignore              ║
+# ║   Covers: Backend (Node/Express) + Frontned (Vanilla JS)    ║
+# ╚══════════════════════════════════════════════════════════════╝
+
+# ── Dependencies ──────────────────────────────────────────────
+node_modules/
+.pnp
+.pnp.js
+
+# ── Environment & Secrets (NEVER commit these) ────────────────
+.env
+.env.*
+!.env.example
+
+# ── Logs ──────────────────────────────────────────────────────
+logs/
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# ── OS-generated files ────────────────────────────────────────
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+Thumbs.db
+desktop.ini
+ehthumbs.db
+
+# ── Build / Coverage output ───────────────────────────────────
+dist/
+build/
+coverage/
+.nyc_output/
+
+# ── IDE & Editor ──────────────────────────────────────────────
+.vscode/
+.idea/
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
+
+# ── ngrok ─────────────────────────────────────────────────────
+ngrok.exe
+ngrok
+
+# ── Presentation / export files (optional — remove if needed) ─
+*.pptx
+*.ppt
+PowerPointContent.txt

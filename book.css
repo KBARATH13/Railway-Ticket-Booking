@@ -1,0 +1,573 @@
+/* ============================
+   Base & Reset
+   ============================ */
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+body {
+    background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
+    min-height: 100vh;
+    font-family: 'Segoe UI', Arial, sans-serif;
+    color: #e0e0e0;
+}
+
+/* ============================
+   Header & Nav
+   ============================ */
+header {
+    background: rgba(0, 0, 0, 0.7);
+    backdrop-filter: blur(15px);
+    padding: 18px 0 0;
+    text-align: center;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    z-index: 1000;
+}
+
+header h1 {
+    font-size: 1.6rem;
+    letter-spacing: 2px;
+    color: #e0c97f;
+    margin-bottom: 12px;
+}
+
+nav ul {
+    list-style: none;
+    display: flex;
+    justify-content: center;
+    gap: 30px;
+    background: rgba(255, 255, 255, 0.05);
+    padding: 10px 0;
+}
+
+nav ul li a {
+    color: #ccc;
+    text-decoration: none;
+    font-size: 15px;
+    letter-spacing: 1px;
+    transition: color 0.2s;
+}
+
+nav ul li a:hover {
+    color: #e0c97f;
+}
+
+/* ============================
+   Main Layout
+   ============================ */
+main {
+    display: flex;
+    justify-content: center;
+    align-items: flex-start;
+    padding: 140px 20px 100px;
+}
+
+/* ============================
+   Booking Container
+   ============================ */
+.booking-container {
+    background: rgba(255, 255, 255, 0.07);
+    backdrop-filter: blur(16px);
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    border-radius: 20px;
+    padding: 36px 40px;
+    width: 100%;
+    max-width: 600px;
+    /* Wider for seat map */
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+}
+
+/* ============================
+   Step Titles
+   ============================ */
+.step-title {
+    font-size: 1.25rem;
+    font-weight: 700;
+    color: #e0c97f;
+    margin-bottom: 24px;
+    padding-bottom: 10px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.hidden {
+    display: none !important;
+}
+
+/* ============================
+   Form Groups
+   ============================ */
+.form-group {
+    margin-bottom: 20px;
+}
+
+.form-group label {
+    display: block;
+    font-size: 13px;
+    font-weight: 600;
+    color: #aaa;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    margin-bottom: 8px;
+}
+
+.form-group input,
+.form-group select {
+    width: 100%;
+    padding: 12px 16px;
+    background: rgba(255, 255, 255, 0.08);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    border-radius: 10px;
+    color: #fff;
+    font-size: 15px;
+    outline: none;
+    transition: border-color 0.25s, background 0.25s;
+    appearance: none;
+}
+
+.form-group input::placeholder {
+    color: #666;
+}
+
+.form-group input:focus,
+.form-group select:focus {
+    border-color: #e0c97f;
+    background: rgba(255, 255, 255, 0.12);
+    box-shadow: 0 0 0 3px rgba(224, 201, 127, 0.15);
+}
+
+.form-group select option {
+    background: #1a1a2e;
+    color: #fff;
+}
+
+/* ============================
+   Passenger Rows (animated)
+   ============================ */
+.passenger-row {
+    animation: slideIn 0.3s ease both;
+}
+
+@keyframes slideIn {
+    from {
+        opacity: 0;
+        transform: translateY(-10px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* ============================
+   Seat Info Badge
+   ============================ */
+.seat-info {
+    background: rgba(224, 201, 127, 0.1);
+    border: 1px solid rgba(224, 201, 127, 0.3);
+    border-radius: 10px;
+    padding: 10px 16px;
+    font-size: 14px;
+    color: #e0c97f;
+    margin-bottom: 20px;
+}
+
+/* ============================
+   Buttons
+   ============================ */
+.btn {
+    display: inline-block;
+    width: 100%;
+    padding: 14px;
+    background: linear-gradient(135deg, #e0c97f, #c8a94a);
+    color: #1a1a2e;
+    font-size: 15px;
+    font-weight: 700;
+    border: none;
+    border-radius: 12px;
+    cursor: pointer;
+    letter-spacing: 0.5px;
+    transition: opacity 0.2s, transform 0.15s;
+    margin-top: 6px;
+}
+
+.btn:hover {
+    opacity: 0.9;
+    transform: translateY(-1px);
+}
+
+.btn:active {
+    transform: translateY(0);
+    opacity: 0.85;
+}
+
+.btn-secondary {
+    background: rgba(255, 255, 255, 0.1);
+    color: #ccc;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.btn-secondary:hover {
+    background: rgba(255, 255, 255, 0.18);
+    opacity: 1;
+}
+
+.btn-row {
+    display: flex;
+    gap: 12px;
+    margin-top: 8px;
+}
+
+.btn-row .btn {
+    margin-top: 0;
+    flex: 1;
+}
+
+/* ============================
+   API Error Message
+   ============================ */
+.api-error {
+    background: rgba(220, 53, 69, 0.12);
+    border: 1px solid rgba(220, 53, 69, 0.4);
+    border-radius: 10px;
+    padding: 10px 16px;
+    color: #f08090;
+    font-size: 14px;
+    margin-bottom: 16px;
+    line-height: 1.5;
+}
+
+/* ============================
+   Confirmation (Step 3)
+   ============================ */
+#step-3 {
+    text-align: center;
+}
+
+.success-icon {
+    width: 72px;
+    height: 72px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #56ab2f, #a8e063);
+    font-size: 36px;
+    color: #fff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 18px;
+    box-shadow: 0 0 30px rgba(86, 171, 47, 0.4);
+    animation: popIn 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+@keyframes popIn {
+    from {
+        transform: scale(0);
+        opacity: 0;
+    }
+
+    to {
+        transform: scale(1);
+        opacity: 1;
+    }
+}
+
+.success-title {
+    color: #a8e063;
+    border-color: rgba(168, 224, 99, 0.25);
+}
+
+.confirmation-box {
+    background: rgba(255, 255, 255, 0.06);
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    border-radius: 14px;
+    padding: 20px 24px;
+    margin: 18px 0 24px;
+    text-align: left;
+}
+
+.confirm-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 7px 0;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+    font-size: 14px;
+}
+
+.confirm-row:last-of-type {
+    border-bottom: none;
+}
+
+.confirm-row span {
+    color: #999;
+}
+
+.nav-link.active {
+    color: #e0c97f !important;
+    font-weight: bold;
+    border-bottom: 2px solid #e0c97f;
+    padding-bottom: 4px;
+}
+
+/* ============================
+   Auth User Display — Top Right
+   ============================ */
+.user-profile {
+    position: fixed;
+    top: 20px;
+    right: 30px;
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    background: rgba(255, 255, 255, 0.08);
+    padding: 8px 18px;
+    border-radius: 30px;
+    backdrop-filter: blur(8px);
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    z-index: 2000;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.4);
+    transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+.user-profile:hover {
+    transform: translateY(-2px);
+    background: rgba(255, 255, 255, 0.12);
+    border-color: rgba(224, 201, 127, 0.4);
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.5);
+}
+
+.user-profile .user-name {
+    color: #e0c97f;
+    font-weight: 600;
+    font-size: 14px;
+}
+
+.user-profile .logout-link {
+    color: #aaa;
+    text-decoration: none;
+    font-size: 12px;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    transition: color 0.2s;
+}
+
+.user-profile .logout-link:hover {
+    color: #f08090;
+}
+
+.confirm-row strong {
+    color: #fff;
+}
+
+.passenger-confirm strong {
+    color: #a8e063;
+}
+
+.passenger-confirm span {
+    color: #aaa;
+}
+
+hr {
+    border: none;
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
+    margin: 12px 0;
+}
+
+.confirmation-box h4 {
+    font-size: 13px;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    color: #aaa;
+}
+
+.booking-id {
+    margin-top: 14px;
+    padding: 10px;
+    background: rgba(224, 201, 127, 0.1);
+    border: 1px solid rgba(224, 201, 127, 0.3);
+    border-radius: 8px;
+    color: #e0c97f;
+    font-size: 13px;
+    font-weight: 600;
+    text-align: center;
+    letter-spacing: 1px;
+}
+
+/* ============================
+   SEAT MAP STYLES
+   ============================ */
+.seat-map-legend {
+    display: flex;
+    justify-content: center;
+    gap: 15px;
+    margin: 20px 0 10px;
+    font-size: 12px;
+    color: #aaa;
+}
+
+.legend-item {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.legend-dot {
+    width: 12px;
+    height: 12px;
+    border-radius: 3px;
+}
+
+.seat-grid {
+    display: grid;
+    gap: 6px;
+    margin: 15px auto;
+    background: rgba(0, 0, 0, 0.2);
+    padding: 15px;
+    border-radius: 10px;
+    /* grid-template-columns set via JS inline style */
+}
+
+.seat {
+    aspect-ratio: 1;
+    background: #444;
+    /* Available */
+    border-radius: 4px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 10px;
+    color: rgba(255, 255, 255, 0.3);
+    position: relative;
+    border: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.seat.booked-other {
+    background: #d64545;
+    /* Red - Occupied by others */
+    color: rgba(255, 255, 255, 0.7);
+    border-color: #ba3232;
+}
+
+.seat.my-seat {
+    background: #56ab2f;
+    /* Green - My Booking */
+    color: #fff;
+    border-color: #4c9629;
+    font-weight: bold;
+    box-shadow: 0 0 10px rgba(86, 171, 47, 0.5);
+    z-index: 1;
+    transform: scale(1.1);
+}
+
+/* ============================
+   Footer
+   ============================ */
+footer {
+    background: rgba(0, 0, 0, 0.5);
+    color: #666;
+    text-align: center;
+    padding: 14px 0;
+    position: fixed;
+    bottom: 0;
+    width: 100%;
+    font-size: 13px;
+    border-top: 1px solid rgba(255, 255, 255, 0.07);
+}
+
+/* ============================
+   Mobile Responsiveness
+   ============================ */
+@media (max-width: 768px) {
+    header {
+        padding: 12px 0 0;
+    }
+
+    header h1 {
+        font-size: 1.4rem;
+        margin-bottom: 8px;
+    }
+
+    nav ul {
+        gap: 15px;
+        padding: 8px 0;
+    }
+
+    nav ul li a {
+        font-size: 13px;
+    }
+
+    main {
+        padding: 120px 10px 80px;
+    }
+
+    .user-profile {
+        top: 10px;
+        right: 15px;
+        padding: 6px 14px;
+    }
+
+    .user-profile .user-name {
+        font-size: 12px;
+    }
+
+    .booking-container {
+        padding: 24px 20px;
+    }
+
+    .step-title {
+        font-size: 1.1rem;
+        margin-bottom: 18px;
+    }
+
+    .form-group label {
+        font-size: 12px;
+    }
+
+    .form-group input,
+    .form-group select {
+        padding: 10px 12px;
+        font-size: 14px;
+    }
+
+    .btn {
+        padding: 12px;
+        font-size: 14px;
+    }
+
+    .seat-grid {
+        gap: 4px;
+        padding: 10px;
+        overflow-x: auto;
+        display: grid;
+        justify-content: start;
+        max-width: 100%;
+    }
+
+    .seat {
+        width: 25px;
+        height: 25px;
+        font-size: 8px;
+    }
+
+    .seat-map-legend {
+        flex-wrap: wrap;
+        gap: 10px;
+    }
+
+    .confirm-row {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 4px;
+    }
+
+    footer {
+        font-size: 11px;
+        padding: 10px 0;
+    }
+}
